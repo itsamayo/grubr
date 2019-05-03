@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+  <head>
+    
+    <title>grubr</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Add manifest -->
+    <link rel="manifest" href="/public/manifest.json">
+    <!-- Tell the browser it's a PWA -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- Tell iOS it's a PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Make sure theme-color is defined -->
+    <meta name="theme-color" content="#f2f5f9">
+    <link rel="shortcut icon" href="/app/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/app/images/favicon.ico" type="image/x-icon">
+  	<meta property="og:url" content="https://grubr.app/"/>
+  	<meta property="og:type" content="website"/>
+  	<meta property="og:title" content="Grubr"/>
+  	<meta property="og:description" content="Find recipes and ingredients with one click"/> 
+  	
+  	<!-- VUE -->
+  	<!--development version, includes helpful console warnings -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+    <!-- production version, optimized for size and speed -->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+    <!-- AXIOS -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  	
+    <!-- JQUERY -->
+  	<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>-->
+
+    <!-- Main custom CSS -->
+  	<link rel="stylesheet" href="app/css/main.css" />
+  	
+  	<!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Lobster|Ubuntu" rel="stylesheet">
+    
+    <!-- SWEET ALERTS -->
+  	<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  	
+  	<!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-126675748-3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'UA-126675748-3');
+    </script>
+
+  	
+  </head>
+  
+  <body>
+    
+    <div id="app-main" style="background-color: #f2f5f9!important;">
+      
+      <!-- SCROLL TO TOP -->
+      <button onclick="topFunction()" id="top" title="Go to top"><i class="fa fa-chevron-up" aria-hidden="true"></i></button>
+      
+      <!-- NAVBAR -->
+      <nav class="navbar navbar-light">
+        <a class="navbar-brand nav-title"><img src="/public/grubr-icon.png" width="30px"/> grubr</a>
+        <a class="form-inline" id="support" @click="popSupportModal">support</a>
+      </nav>
+      
+      <!-- MAIN CONTAINER -->
+      <div class="container">
+        <!-- HEADING -->
+        <div class="col-sm-6 offset-sm-3 text-center">
+            <div class="info-form">
+                <div class="form-inline justify-content-center" id="search">
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" placeholder="Find Recipes" aria-label="Search" v-model="query" v-on:keyup.enter="submit">
+                      <div class="input-group-append">
+                        <button class="btn btn-outline-info" type="button" type="submit" value="Search" id="submit" @click="submit">
+                          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="isSearching"></span>
+                          Search
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+        </div>
+        <h2 v-if="currentResults.length==0">Find recipes from around the world</b>
+        <h2 v-if="currentResults.length>0">Recipes - <b>{{ currentResults }} </b><br>
+          <span v-if="currentResults.length>0 && recipes.length==0 && !isSearching" class="quantity">(We couldn't find any recipes)</span>
+          <span v-if="currentResults.length>0 && recipes.length<50 && recipes.length>0 && !isSearching" class="quantity">({{recipes.length}} recipes found)</span>
+          <span v-if="currentResults.length>0 && recipes.length>=50 && !isSearching" class="quantity">(50+ recipes found)</span>
+          <span v-if="currentResults.length>0 && isSearching" class="quantity">(Searching for recipes...)</span>
+        </h2><br>
+        <!-- CARDS -->
+        <div class="card-columns">
+          <div v-for="recipe in recipes" class="card" style="width: 19rem; cursor: pointer;" @click="popRecipeModal(recipe)">
+            <img class="card-img-top" v-bind:src="recipe.image" alt="recipe image">
+            <div class="card-body">
+              <h5 class="card-title">{{ recipe.label }}</h5>
+              <p class="card-text">By: {{ recipe.source }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Recipe Modal -->
+      <div v-if="showRecipeModal">
+        <transition name="recipeModal">
+          <div class="modal-mask">
+            <div class="modal-wrapper">
+              <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <h5 class="modal-title">{{ selectedRecipe.label }} <span class="servings">Serves {{ selectedRecipe.yield }}</span></h5>
+                          <button type="button" class="close" data-dismiss="recipeModal" aria-label="Close">
+                          <span aria-hidden="true" @click="showRecipeModal = false">&times;</span>
+                          </button>
+                      </div>
+                      <div class="modal-body">
+                          <p>Ingredients:</p>
+                          <div v-for="ingredient in selectedRecipe.ingredientLines">
+                            <p class="ingredients">{{ ingredient }}</p>
+                          </div>
+                          <p>Notes:</p>
+                          <div v-for="health in selectedRecipe.healthLabels">
+                            <p class="ingredients">{{ health }}</p>
+                          </div>
+                      </div>
+                      <div class="modal-footer">
+                          <a v-bind:href="selectedRecipe.url" target="_blank" ><button type="button"class="btn btn-outline-info">See Recipe</button></a>
+                          <!--<button type="button" class="btn btn-secondary" @click="showModal = false">Close</button>-->
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+      
+      <!-- Support Modal -->
+      <div v-if="showSupportModal">
+        <transition name="supportModal">
+          <div class="modal-mask">
+            <div class="modal-wrapper">
+              <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          <h5 class="modal-title">Support <span class="servings">v1.0.0</span></h5>
+                          <button type="button" class="close" data-dismiss="supportModal" aria-label="Close">
+                          <span aria-hidden="true" @click="showSupportModal = false">&times;</span>
+                          </button>
+                      </div>
+                      <div class="modal-body">
+                          <p><img src="/public/grubr-icon.png" width="20px"/> grubr, for all intents and purposes, a super simple recipe searching PWA. All results include basic health information/warnings, ingredients and a direct link to the original recipe from their creators.<br><br>
+                            For any queries/complaints please feel free to DM me on <a href="https://twitter.com/AshMikeKetchum" target="blank">Twitter</a><br><br>
+                            Made with ❤️ by <a href="https://ashleysanders.co.za" target="blank">mayo</a>
+                          </p>
+                      </div>
+                      <div class="modal-footer">
+                          <a href="buymeacoff.ee/F4HOt62" target="_blank" ><button type="button"class="btn btn-outline-info">Support The Dev</button></a>
+                          <!--<button type="button" class="btn btn-secondary" @click="showModal = false">Close</button>-->
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+      
+    </div>
+    
+    <script>
+    // When the user scrolls down 20px from the top of the document, show the button
+    window.onscroll = function() {scrollFunction()};
+    
+    function scrollFunction() {
+      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("top").style.display = "block";
+      } else {
+        document.getElementById("top").style.display = "none";
+      }
+    }
+    
+    // When the user clicks on the button, scroll to the top of the document
+    function topFunction() {
+      var currentYOffset = self.pageYOffset;
+      var initYOffset = currentYOffset;
+    
+      var intervalId = setInterval(function(){
+      currentYOffset -= initYOffset*0.05; 
+      document.body.scrollTop = currentYOffset ;
+      document.documentElement.scrollTop = currentYOffset;
+    
+        if(self.pageYOffset == 0){
+          clearInterval(intervalId);
+        }
+      }, 10);
+    
+    } 
+    </script>
+    
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/public/service-worker.js').then(function(registration) {
+            // Registration was successful
+            // console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, function(err) {
+            // registration failed :(
+            console.log('ServiceWorker registration failed: ', err);
+          }).catch(function(err) {
+            console.log(err)
+          });
+        });
+      } else {
+        console.log('service worker is not supported');
+      }
+    </script>
+    
+  </body>
+  
+  <!-- -- Add Scripts Here -->
+  <script type="text/javascript" src="/app/js/main.js"></script>
+</html>

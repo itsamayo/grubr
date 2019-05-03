@@ -1,0 +1,23 @@
+{
+  // Short name is what appears on home screen
+  "short_name": "grubr",
+  // Name is what appears on splash screen
+  "name": "grubr",
+  // What appears on splash screen & home screen
+  "icons": [
+    {
+      "src":"/public/grubr-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  // So your site can tell it was opened from home screen
+  "start_url": "/?utm_source=homescreen",
+  // Match our app header background
+  "background_color": "#f2f5f9",
+  // What the URL bar will look like
+  "theme_color": "#f2f5f9",
+  // How the app will appear when it launches (see link below)
+  "display": "standalone"
+  // Read more: https://developer.mozilla.org/en-US/docs/Web/Manifest
+}
