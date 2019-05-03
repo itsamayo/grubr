@@ -123,8 +123,30 @@ a:hover {
     color: #616e82
 }
 
+.nav-title {
+    color: #393939!important;
+}
+
 .swal-button {
     background-color: transparent!important;
     font-size: 30px!important;
         padding: 8px 14px!important;
+}
+
+.btn-outline-info {
+    color: #77a3ea!important;
+    border-color: #77a3ea!important;
+}
+
+.btn-outline-info:hover {
+    color: #fff!important;
+    background-color: #77a3ea!important;
+}
+
+.card-title {
+    color: #393939;
+}
+
+.card-text {
+    color: #77a3ea;
 }

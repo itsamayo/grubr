@@ -68,7 +68,7 @@
       <!-- NAVBAR -->
       <nav class="navbar navbar-light">
         <a class="navbar-brand nav-title"><img src="/public/grubr-icon.png" width="30px"/> grubr</a>
-        <a class="form-inline" id="support" @click="popSupportModal">support</a>
+        <a class="form-inline" id="support" style="cursor: pointer;" @click="popSupportModal">support</a>
       </nav>
       
       <!-- MAIN CONTAINER -->
@@ -89,7 +89,7 @@
                   </div>
             </div>
         </div>
-        <h2 v-if="currentResults.length==0">Find recipes from around the world</b>
+        <h2 v-if="currentResults.length==0" style="color:#77a3ea">Find recipes from around the world</b>
         <h2 v-if="currentResults.length>0">Recipes - <b>{{ currentResults }} </b><br>
           <span v-if="currentResults.length>0 && recipes.length==0 && !isSearching" class="quantity">(We couldn't find any recipes)</span>
           <span v-if="currentResults.length>0 && recipes.length<50 && recipes.length>0 && !isSearching" class="quantity">({{recipes.length}} recipes found)</span>
@@ -156,7 +156,7 @@
                           </button>
                       </div>
                       <div class="modal-body">
-                          <p><img src="/public/grubr-icon.png" width="20px"/> grubr, for all intents and purposes, a super simple recipe searching PWA. All results include basic health information/warnings, ingredients and a direct link to the original recipe from their creators.<br><br>
+                          <p><img src="/public/grubr-icon.png" width="20px"/> grubr, for all intents and purposes, is a super simple recipe searching PWA. All results include basic health information/warnings, ingredients and a direct link to the original recipe from their creators.<br><br>
                             For any queries/complaints please feel free to DM me on <a href="https://twitter.com/AshMikeKetchum" target="blank">Twitter</a><br><br>
                             Made with ❤️ by <a href="https://ashleysanders.co.za" target="blank">mayo</a>
                           </p>
