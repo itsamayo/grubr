@@ -20,7 +20,6 @@ var app = new Vue({
   methods: {
       search() {
           if (this.query === '') {
-              swal("We can't find any recipes if you don't type anything in. Why not try searching for something like avocado ice cream?");
               swal({
                 title: "💢️",
                 text: "We can't find any recipes if you don't type anything in. Why not try searching for something like avocado ice cream?",
